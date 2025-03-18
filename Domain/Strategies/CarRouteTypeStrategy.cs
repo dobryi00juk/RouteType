@@ -3,7 +3,7 @@ using Domain.Enums;
 
 namespace Domain.Strategies;
 
-public class CarRouteTypeStrategy : IRouteTypeStrategy
+internal class CarRouteTypeStrategy : IRouteTypeStrategy
 {
     private readonly int _simplePointCount;
 
@@ -12,7 +12,7 @@ public class CarRouteTypeStrategy : IRouteTypeStrategy
         _simplePointCount = simplePointCount;
     }
 
-    public bool CanHandle(Route route)
+    public bool TryHandle(Route route)
     {
         if (route == null) throw new ArgumentNullException(nameof(route));
 
@@ -21,17 +21,13 @@ public class CarRouteTypeStrategy : IRouteTypeStrategy
             .Distinct()
             .ToList();
 
-        return distinctTransports.Count == 1 && distinctTransports[0] == TransportType.Car;
-    }
+        if (!(distinctTransports.Count == 1 && distinctTransports[0] == TransportType.Car))
+            return false;
 
-    public RouteType Determine(Route route)
-    {
-        if (route == null) throw new ArgumentNullException(nameof(route));
-
-        //TODO: количество точек может меняться
-
-        return route.Points.Count == _simplePointCount
+        route.Type = route.Points.Count == _simplePointCount
             ? RouteType.CarSimple
             : RouteType.CarComplex;
+
+        return true;
     }
 }

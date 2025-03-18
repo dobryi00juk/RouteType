@@ -6,23 +6,22 @@ namespace Domain.Services;
 
 public class RouteTypeService : IRouteTypeService
 {
-    private readonly IEnumerable<IRouteTypeStrategy> _strategies;
-
-    public RouteTypeService(IEnumerable<IRouteTypeStrategy> strategies)
+    
+    private readonly IEnumerable<IRouteTypeStrategy> _strategies = new List<IRouteTypeStrategy>
     {
-        _strategies = strategies;
-    }
+        new MultiModalRouteTypeStrategy(),
+        new CarRouteTypeStrategy(2),
+        new TrainRouteTypeStrategy(2),
+        new ShipRouteTypeStrategy(2)
+    };
 
     public RouteType GetRouteType(Route route)
     {
         if (route == null) throw new ArgumentNullException(nameof(route));
 
-        foreach (var strategy in _strategies)
+        if (_strategies.Any(strategy => strategy.TryHandle(route)))
         {
-            if (strategy.CanHandle(route))
-            {
-                return strategy.Determine(route);
-            }
+            return route.Type;
         }
 
         throw new InvalidOperationException($"Route type {route.GetType()} is not supported");

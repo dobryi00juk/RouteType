@@ -3,9 +3,9 @@ using Domain.Enums;
 
 namespace Domain.Strategies;
 
-public class MultiModalRouteTypeStrategy : IRouteTypeStrategy
+internal class MultiModalRouteTypeStrategy : IRouteTypeStrategy
 {
-    public bool CanHandle(Route route)
+    public bool TryHandle(Route route)
     {
         if (route == null) throw new ArgumentNullException(nameof(route));
 
@@ -14,11 +14,11 @@ public class MultiModalRouteTypeStrategy : IRouteTypeStrategy
             .Distinct()
             .Count();
 
-        return distinctTransports > 1;
-    }
+        if (distinctTransports <= 1)
+            return false;
 
-    public RouteType Determine(Route route)
-    {
-        return RouteType.MultiModal;
+        route.Type = RouteType.MultiModal;
+
+        return true;
     }
 }

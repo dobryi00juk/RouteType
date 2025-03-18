@@ -2,6 +2,7 @@
 using Domain.Enums;
 using Domain.Services;
 using Domain.Strategies;
+using FluentAssertions;
 
 namespace Domain.Tests;
 
@@ -11,24 +12,13 @@ public class RouteTypeTest
     private static readonly Location Chisinau = new("Chisinau", "1st", "", "123", "Moldova");
     private static readonly Location Odessa = new("Odessa", "2sd", "", "123", "Ukraine");
     private static readonly Location Hamburg = new("Hamburg", "123", "", "123", "Germany");
-    private const int SimplePointCount = 2;
-
-    private static readonly IRouteTypeStrategy[] Strategies =
-    {
-        new MultiModalRouteTypeStrategy(),
-        new CarRouteTypeStrategy(SimplePointCount),
-        new TrainRouteTypeStrategy(SimplePointCount),
-        new ShipRouteTypeStrategy(SimplePointCount)
-    };
 
     [Theory]
     [MemberData(nameof(GetRouteTestData))]
     public void DetermineType_ShouldReturnExpected(Route route, RouteType expectedRouteType)
     {
-        var service = new RouteTypeService(Strategies);
-        var routeType = service.GetRouteType(route);
-
-        Assert.Equal(expectedRouteType, routeType);
+        var service = new RouteTypeService();
+        service.GetRouteType(route).Should().Be(expectedRouteType);
     }
 
     public static IEnumerable<object[]> GetRouteTestData()
